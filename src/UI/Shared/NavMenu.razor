@@ -1,0 +1,62 @@
+﻿@inject NavigationManager navigationmanager
+
+<ul>
+
+    <li>
+        <NavLink href="/configuration" Match="NavLinkMatch.All">
+            <div class="nav-item @(IsPageActive("/configuration") ? "active" : "")">
+                <div class="logo">
+                    <img src="images/Controls.svg" alt="logo" />
+                </div>
+            </div>
+        </NavLink>
+    </li>
+
+        <li>
+        <NavLink href="/data-entities" Match="NavLinkMatch.All">
+            <div class="nav-item @(IsPageActive("/data-entities") ? "active" : "")">
+                <div class="logo">
+                    <img src="images/Cubes.svg" alt="logo" />
+                </div>
+            </div>
+        </NavLink>
+    </li>
+
+    <li>
+        <NavLink href="/api-viewer" Match="NavLinkMatch.All">
+            <div class="nav-item @(IsPageActive("/api-viewer") ? "active" : "")">
+                <div class="logo">
+                    <img src="images/Activity-Log.svg" alt="logo" />
+                </div>
+            </div>
+        </NavLink>
+    </li>
+
+</ul>
+
+@code {
+    private string? target;
+
+    protected override void OnInitialized()
+    {
+        navigationmanager.LocationChanged += LocationChanged;
+        base.OnInitialized();
+    }
+
+    private void LocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        Uri uri = new Uri(e.Location);
+        if (uri.Segments.Count() > 1)
+            target = uri.Segments[1];
+        else
+            target = "";
+        StateHasChanged();
+    }
+
+    private bool IsPageActive(string page)
+    {
+        // Determine if the current page is active
+        return navigationmanager.Uri.EndsWith(page, StringComparison.OrdinalIgnoreCase);
+    }
+
+}

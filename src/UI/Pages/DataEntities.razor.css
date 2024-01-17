@@ -1,0 +1,13 @@
+.entity-table-container {
+    display: flex;
+    flex-direction: row;
+}
+
+.entity-list{
+    flex-basis: 100%;
+    min-width: 15rem;
+}
+
+.entity-details {
+    flex-basis: 900%;
+}

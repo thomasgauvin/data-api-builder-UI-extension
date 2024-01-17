@@ -285,6 +285,12 @@ namespace Azure.DataApiBuilder.Service
             app.UseCorrelationIdMiddleware();
             app.UsePathRewriteMiddleware();
 
+            //Adding custom Database Connections Studio UI
+            if (IsUIEnabled(runtimeConfig, env))
+            {
+                app.UseStaticFiles(); //serving the built html from wwwroot
+            }
+
             // SwaggerUI visualization of the OpenAPI description document is only available
             // in developer mode in alignment with the restriction placed on ChilliCream's BananaCakePop IDE.
             // Consequently, SwaggerUI is not presented in a StaticWebApps (late-bound config) environment.
@@ -341,6 +347,24 @@ namespace Azure.DataApiBuilder.Service
             app.UseClientRoleHeaderAuthenticationMiddleware();
 
             app.UseAuthorization();
+
+            //add endpoints to get and set the runtime config when in development
+            if (env.IsDevelopment())
+            {
+                app.UseEndpoints(endpoints =>
+                {
+                    endpoints.MapGet("/dab-config", async context =>
+                    {
+                        context.Response.ContentType = "application/json";
+                        await context.Response.WriteAsync(runtimeConfig!.ToJson());
+                    });
+
+                    endpoints.MapControllerRoute(
+                        name: "dab-config",
+                        pattern: "/dab-config"
+                    );
+                });
+            }
 
             // Authorization Engine middleware enforces that all requests (including introspection)
             // include proper auth headers.

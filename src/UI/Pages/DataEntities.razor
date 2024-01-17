@@ -1,0 +1,292 @@
+@using UI.Shared.SharedClasses
+@using UI.Shared.SharedClasses.Mutables
+@using Azure.DataApiBuilder.Config.ObjectModel
+@using System.Text.Json
+@inject HttpClient Http
+
+@page "/data-entities"
+
+<FluentLabel Typo=Typography.PageTitle>Data Entities</FluentLabel>
+
+<div class="entity-table-container">
+@if(mutableRuntimeConfig != null)
+{
+    <div class="entity-list">
+        <FluentDataGrid Items="@entityKVPair">
+            <TemplateColumn>
+                <FluentCheckbox @bind-Value=context.IsSelected
+                                @onclick="(e) => HandleCheckboxEvent(context.Key)"></FluentCheckbox>
+            </TemplateColumn>
+            <PropertyColumn Property="@(p => p.Key)" Sortable="true" />
+                @if (!IsEntitySelected())
+                {
+                    <PropertyColumn Property="@(p => p.MutableEntity)" Sortable="true" />
+
+                }
+        </FluentDataGrid>
+    </div>
+
+    @if (IsEntitySelected())
+    {
+            <div class="entity-details" style="border: 1px solid red;">
+            <FluentLabel Typo=Typography.Header>@selectedEntity!.Key</FluentLabel>
+            <div>
+                <FluentTabs @bind-ActiveTabId="@activeid">
+                    <FluentTab Label="Configuration" Id="configuration" DeferredLoading="@DeferredLoading">
+                        <div>
+                            <FluentTextField @bind-Value=selectedEntity!.MutableEntity!.Rest.Path Label="REST endpoint" style="width: 100%;"></FluentTextField>
+                            <FluentTextField @bind-Value=selectedEntity!.MutableEntity!.GraphQL.Singular Label="GraphQL singular endpoint" style="width: 100%;"></FluentTextField>
+                            <FluentTextField @bind-Value=selectedEntity!.MutableEntity!.GraphQL.Plural Label="GraphQL plural endpoint" style="width: 100%;"></FluentTextField>
+                        </div>
+                    </FluentTab>
+                    <FluentTab Label="Permissions" Id="permissions" DeferredLoading="@DeferredLoading">
+                        <div>
+                            <FluentDataGrid Items="@selectedEntity!.MutableEntity!.Permissions.AsQueryable()">
+                                <PropertyColumn Property="@(p => ((EntityPermission) p).Role)" Sortable="true" />
+                                <PropertyColumn Property="@(p => ((EntityPermission) p).Actions.ToString())" Sortable="true" />
+                            </FluentDataGrid>
+                        </div>
+                    </FluentTab>
+                    <FluentTab Label="Relationships" Id="relationships" DeferredLoading="@DeferredLoading">
+                        <div>
+                            @if(selectedEntity!.MutableEntity!.Relationships != null){
+                                    <FluentDataGrid Items="@selectedEntity!.MutableEntity!.Relationships.AsQueryable()">
+                                        <PropertyColumn Property="@(p => p.Key)" Sortable="true" />
+                                    </FluentDataGrid>
+                                }
+                        </div>
+                    </FluentTab>
+                    <FluentTab Label="Data" Id="data" DeferredLoading="@DeferredLoading" @onclick="() => HandleDataTabClick()">
+                        <FluentDataGrid Items="@dataList.AsQueryable()">
+                            @foreach(var column in dataResponseColumns)
+                            {
+                                <TemplateColumn Title="@column">
+                                    @context.data[column]
+                                    </TemplateColumn>
+                            }
+                            <TemplateColumn Title="edit">
+                                    <span>🖊️</span>
+                                
+                            </TemplateColumn>
+                            <TemplateColumn Title="delete">
+                                <span>🗑️</span>
+                            </TemplateColumn>
+                        </FluentDataGrid>
+                    </FluentTab>
+                </FluentTabs>
+            </div>
+        </div>
+    }
+}
+</div>
+
+@code {
+    [CascadingParameter]
+    protected MutableRuntimeConfig? mutableRuntimeConfig { get; set; }
+    protected IQueryable<EntityKVPair>? entityKVPair { get; set; }
+    protected bool test = false;
+    protected EntityKVPair? selectedEntity { get; set; }
+    string activeid = "configuration";
+    bool DeferredLoading = false;
+
+
+    List<RowDetails> dataList = new List<RowDetails> { };
+    string dataResponseBody = "";
+    string[] dataResponseColumns = new string[] { };
+
+    private void AddEmptyMember()
+    {
+        var emptyMember = new Dictionary<string, object>();
+
+        foreach (var column in dataResponseColumns)
+        {
+            // You can set default values or leave them empty based on your requirements
+            emptyMember[column] = "";
+        }
+
+        var newRowDetails = new RowDetails(true, emptyMember);
+
+        dataList.Add(newRowDetails);
+    }
+
+    private Func<object, object> GetPropertyValue(string propertyName)
+    {
+        return item => ((Dictionary<string, object>)item)[propertyName];
+    }
+
+    protected async Task HandleDataTabClick()
+    {
+        try
+        {
+            // Make a GET request to /rest/Person
+            HttpResponseMessage response = await Http.GetAsync("/rest/Person");
+
+            // Check if the request was successful (status code 200)
+            if (response.IsSuccessStatusCode)
+            {
+                // Parse and process the response content
+                dataResponseBody = await response.Content.ReadAsStringAsync();
+
+                var jsonObject = JsonDocument.Parse(dataResponseBody);
+
+                JsonElement root = jsonObject.RootElement;
+
+                if (root.TryGetProperty("value", out JsonElement valueArray) && valueArray.ValueKind == JsonValueKind.Array)
+                {
+                    // Access the first item in the "value" array
+                    JsonElement firstItem = valueArray.EnumerateArray().FirstOrDefault();
+
+                    // Extract keys from the first item
+                    dataResponseColumns = ExtractKeys(firstItem);
+                    var detailsRow = new List<RowDetails> { };
+
+                    foreach (var item in valueArray.EnumerateArray())
+                    {
+                        var itemDictionary = DeserializeJsonObject(item);
+                        detailsRow.Add(new RowDetails(false, itemDictionary));
+                    }
+
+                    dataList = detailsRow;
+                }
+            }
+            else
+            {
+                // Handle unsuccessful response (e.g., log or display an error)
+                Console.WriteLine($"Error: {response.StatusCode}");
+            }
+        }
+        catch (Exception ex)
+        {
+            // Handle exceptions (e.g., network issues, timeouts)
+            Console.WriteLine($"Exception: {ex.Message}");
+        }
+    }
+
+    private static Dictionary<string, object> DeserializeJsonObject(JsonElement jsonElement)
+    {
+        var dictionary = new Dictionary<string, object>();
+
+        // Check if the element is an object
+        if (jsonElement.ValueKind == JsonValueKind.Object)
+        {
+            // Iterate over object properties
+            foreach (var property in jsonElement.EnumerateObject())
+            {
+                // Add property name and value to the dictionary
+                dictionary[property.Name] = DeserializeJsonValue(property.Value)!;
+            }
+        }
+
+        return dictionary;
+    }
+
+    private static object? DeserializeJsonValue(JsonElement jsonElement)
+    {
+        // Check the value kind and deserialize accordingly
+        switch (jsonElement.ValueKind)
+        {
+            case JsonValueKind.Object:
+                return DeserializeJsonObject(jsonElement);
+            case JsonValueKind.Array:
+                // Handle array if needed
+                break;
+            case JsonValueKind.String:
+                return jsonElement.GetString() ?? "";
+            case JsonValueKind.Number:
+                // Choose the appropriate type (e.g., int, double) based on your needs
+                return jsonElement.GetInt32();
+            case JsonValueKind.True:
+                return true;
+            case JsonValueKind.False:
+                return false;
+            case JsonValueKind.Null:
+                return null;
+        }
+
+        return null;
+    }
+
+    private static string[] ExtractKeys(JsonElement jsonElement)
+    {
+        // Check if the element is an object
+        if (jsonElement.ValueKind == JsonValueKind.Object)
+        {
+            // Extract keys from the object
+            var keys = jsonElement.EnumerateObject().Select(property => property.Name).ToArray();
+            return keys;
+        }
+
+        return Array.Empty<string>();
+    }
+
+    protected bool IsEntitySelected()
+    {
+        return selectedEntity != null && entityKVPair!.Any(e => e.IsSelected);
+    }
+
+    protected void HandleCheckboxEvent(string? key)
+    {
+        Console.WriteLine(IsEntitySelected());
+        DeselectOtherEntities(key);
+        selectedEntity = entityKVPair!.Where(e => e.Key == key).FirstOrDefault();
+    }
+
+    protected void DeselectOtherEntities(string? key)
+    {
+        //for all entity kv pair, set is selected to false
+        if (entityKVPair == null) return;
+
+        foreach(var e in entityKVPair)
+        {
+            if (!e.Key!.Equals(key))
+            {
+                e.IsSelected = false;
+            }
+        }
+    }
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+
+        // This code will be executed every time the cascading parameters are updated
+        Console.WriteLine("Cascading parameters updated!");
+
+        Console.WriteLine("First Render");
+
+        if (mutableRuntimeConfig != null)
+        {
+            entityKVPair = mutableRuntimeConfig.MutableRuntimeEntities.Entities
+                .Select(kvp => new EntityKVPair { Key = kvp.Key, MutableEntity = kvp.Value, IsSelected = false })
+            .ToArray()
+                .AsQueryable();
+
+            Console.WriteLine("entityKVPair");
+            Console.WriteLine(entityKVPair);
+        }
+    }
+
+    protected void LogJSON()
+    {
+        Console.WriteLine(mutableRuntimeConfig!.ToJson());
+    }
+
+    protected class RowDetails
+    {
+        public bool IsEditabled { get; set; }
+        public Dictionary<string, object> data { get; set; }
+
+        public RowDetails(bool IsEditable, Dictionary<string, object> data)
+        {
+            this.data = data;
+            this.IsEditabled = IsEditable;
+        }
+    }
+
+    protected class EntityKVPair
+    {
+        public bool IsSelected = false;
+        public string? Key;
+        public MutableEntity? MutableEntity;
+    }
+}

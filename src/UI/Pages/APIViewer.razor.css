@@ -1,0 +1,8 @@
+.iframe-container {
+    height: calc(100vh - 120px); /*replace after poc*/
+}
+
+.iframe-container iframe {
+    height: 100%;
+    width: 100%;
+}

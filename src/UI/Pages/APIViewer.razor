@@ -1,0 +1,26 @@
+@page "/api-viewer"
+
+<FluentTabs @bind-ActiveTabId="@activeid" OnTabChange="HandleOnTabChange" >
+    <FluentTab Label="REST" Id="rest" DeferredLoading="@DeferredLoading">
+        <div class="iframe-container">
+            <iframe src="https://localhost:44353/swagger/" frameborder="0"></iframe>
+        </div>
+    </FluentTab>
+    <FluentTab Label="GraphQL" Id="graphql">
+        <div class="iframe-container">
+            <iframe src="https://localhost:44353/graphql/" frameborder="0"></iframe>
+        </div>
+    </FluentTab>
+</FluentTabs>
+
+
+@code {
+    bool DeferredLoading = false;
+    string activeid = "rest";
+    FluentTab? changedto;
+
+    private void HandleOnTabChange(FluentTab tab)
+    {
+        changedto = tab;
+    }
+}

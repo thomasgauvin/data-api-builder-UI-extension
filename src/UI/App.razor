@@ -1,0 +1,48 @@
+@using System.Text.Json
+@using System
+@using Azure.DataApiBuilder.Config
+@using Azure.DataApiBuilder.Config.ObjectModel
+@using UI.Shared.SharedClasses
+@inject HttpClient Http
+
+<Router AppAssembly="@typeof(App).Assembly">
+    <Found Context="routeData">
+        <CascadingValue Value="mutableRuntimeConfig">
+            <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
+        </CascadingValue>
+    </Found>
+    <NotFound>
+        <PageTitle>Not found</PageTitle>
+        <LayoutView Layout="@typeof(MainLayout)">
+            <p role="alert">Sorry, there's nothing at this address.</p>
+        </LayoutView>
+    </NotFound>
+</Router>
+
+@code {
+    private MutableRuntimeConfig? mutableRuntimeConfig { get; set; }
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        Console.WriteLine("OnInitializedAsync in App.razor");
+
+        await GetParsedJson();
+    }
+
+    protected async Task GetParsedJson()
+    {
+        Console.WriteLine("Making request to get JSON");
+        var response = await Http.GetStringAsync("/dab-config/");
+        Console.WriteLine(response);
+
+        RuntimeConfig? runtimeConfig;
+        RuntimeConfigLoader.TryParseConfig(response, out runtimeConfig);
+
+        if (runtimeConfig == null) return;
+
+        //copy runtimeConfig into mutable config
+        mutableRuntimeConfig = new MutableRuntimeConfig(runtimeConfig);
+    }
+
+}

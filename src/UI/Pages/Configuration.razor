@@ -1,0 +1,84 @@
+@page "/configuration"
+@using System.Text.Json
+@using System
+@using UI.Shared.SharedClasses
+
+<FluentLabel Typo=Typography.PageTitle>Configuration</FluentLabel>
+
+@if (mutableRuntimeConfig != null)
+{
+    <div class="config-container">
+        <div class="config-item-container">
+            <FluentSelect @bind-Value=mutableRuntimeConfig.MutableDataSource.DatabaseType Items=@databaseTypes
+                          OptionValue="@(p => p.Value)"
+                          OptionText="@(p => p.Label)"
+                      Label="Database type" />
+
+        </div>
+        <div class="config-item-container">
+            <FluentTextField @bind-Value=mutableRuntimeConfig.MutableDataSource.ConnectionString Label="Connection string" style="width: 100%;"></FluentTextField>
+        </div>
+    </div>
+    <FluentDivider />
+    <FluentLabel Typo=Typography.Header>Runtime</FluentLabel>
+
+    <div class="config-container">
+        <div class="config-container">
+            <FluentLabel Typo=Typography.Subject>REST</FluentLabel>
+            <div class="config-item-container flex">
+                <FluentSwitch @bind-Value=mutableRuntimeConfig.MutableRuntimeOptions.Rest.Enabled>Enabled</FluentSwitch>
+                <div class="ml-4">
+                    <FluentTextField @bind-Value=mutableRuntimeConfig.MutableRuntimeOptions.Rest.Path AriaLabel="Path"></FluentTextField>
+                </div>
+            </div>
+        </div>
+
+        <div class="config-container">
+            <FluentLabel Typo=Typography.Subject>GraphQL</FluentLabel>
+            <div class="config-item-container flex">
+                <FluentSwitch @bind-Value=mutableRuntimeConfig.MutableRuntimeOptions.GraphQL.Enabled>Enabled</FluentSwitch>
+                <div class="ml-4">
+                    <FluentTextField @bind-Value=mutableRuntimeConfig.MutableRuntimeOptions.GraphQL.Path AriaLabel="Path"></FluentTextField>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="config-container">
+        <FluentLabel Typo=Typography.Subject>CORS</FluentLabel>
+        <div class="config-item-container">
+            <FluentTextField @bind-Value=mutableRuntimeConfig!.MutableRuntimeOptions!.Host!.Cors!.Origins Label="CORS origins"></FluentTextField>
+        </div>
+    </div>
+
+    <FluentButton OnClick="LogJSON">Log JSON</FluentButton>
+
+
+}
+else
+{
+    <p>Loading...</p>
+}
+
+
+@code {
+    [CascadingParameter]
+    protected MutableRuntimeConfig? mutableRuntimeConfig { get; set; }
+
+
+    private List<DatabaseType> databaseTypes = new List<DatabaseType>
+    {
+        new DatabaseType { Label = "Azure SQL", Value = "mssql" },
+        new DatabaseType { Label = "CosmosDB for NoSQL", Value = "cosmosdb_nosql" },
+        new DatabaseType { Label = "PostgreSQL", Value = "postgresql" },
+        new DatabaseType { Label = "MySQL", Value = "mysql" }
+    };
+
+
+    protected void LogJSON()
+    {
+        Console.WriteLine("logging");
+        string value = mutableRuntimeConfig?.ToJson() ?? "";
+        Console.WriteLine(value);
+    }
+}
