@@ -2,8 +2,11 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Net.Mime;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Azure.DataApiBuilder.Config;
+using Azure.DataApiBuilder.Config.ObjectModel;
 using Azure.DataApiBuilder.Core.Configurations;
 using Azure.DataApiBuilder.Core.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -22,6 +25,21 @@ namespace Azure.DataApiBuilder.Service.Controllers
         {
             _configurationProvider = configurationProvider;
             _logger = logger;
+        }
+
+        [HttpGet]
+        [Produces("application/json")]
+        public ContentResult Index()
+        {
+            if (_configurationProvider.TryGetConfig(out RuntimeConfig? runtimeConfig))
+            {
+                string serializedRuntimeConfig = JsonSerializer.Serialize(runtimeConfig);
+                return Content(serializedRuntimeConfig, MediaTypeNames.Application.Json);
+            }
+            else
+            {
+                return Content("No config found.", MediaTypeNames.Application.Json);
+            }
         }
 
         /// <summary>
