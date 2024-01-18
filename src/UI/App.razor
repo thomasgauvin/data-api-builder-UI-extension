@@ -33,7 +33,8 @@
     protected async Task GetParsedJson()
     {
         Console.WriteLine("Making request to get JSON");
-        var response = await Http.GetStringAsync("/dab-config/");
+        //Http.BaseAddress = new Uri("");
+        var response = await Http.GetStringAsync("https://localhost:5001/dab-config/");
         Console.WriteLine(response);
 
         RuntimeConfig? runtimeConfig;
