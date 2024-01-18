@@ -21,4 +21,9 @@
   <ItemGroup>
     <ProjectReference Include="..\Config\Azure.DataApiBuilder.Config.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Update="wwwroot\dab-config.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
 </Project>
