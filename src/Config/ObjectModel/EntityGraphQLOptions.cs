@@ -11,9 +11,9 @@ namespace Azure.DataApiBuilder.Config.ObjectModel;
 /// <param name="Enabled">Indicates if GraphQL is enabled for the entity.</param>
 /// <param name="Operation">When the entity maps to a stored procedure, this represents the GraphQL operation to use, otherwise it will be null.</param>
 /// <seealso cref="<https://engdic.org/singular-and-plural-noun-rules-definitions-examples/"/>
-/// <details>
+/// <remarks>
 /// This type is mutable.
-/// </details>
+/// </remarks>
 public class EntityGraphQLOptions
 {
     public string Singular { get; set; }

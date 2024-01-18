@@ -6,9 +6,9 @@ namespace Azure.DataApiBuilder.Config.ObjectModel;
 /// <summary>
 /// EntityActionFields
 /// </summary>
-/// <details>
+/// <remarks>
 /// This type is mutable.
-/// </details>
+/// </remarks>
 public class EntityActionFields
 {
     /// <summary>

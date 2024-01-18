@@ -3,9 +3,9 @@
 
 namespace Azure.DataApiBuilder.Config.ObjectModel;
 
-/// <summary>
+/// <remarks>
 /// This type is mutable.
-/// </summary>
+/// </remarks>
 public class EntityAction
 {
     public EntityAction(EntityActionOperation action, EntityActionFields? fields, EntityActionPolicy? policy)

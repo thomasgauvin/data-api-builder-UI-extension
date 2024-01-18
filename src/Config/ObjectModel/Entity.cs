@@ -19,9 +19,9 @@ namespace Azure.DataApiBuilder.Config.ObjectModel;
 /// <param name="Mappings">Defines mappings between database fields and GraphQL and REST fields.</param>
 /// <param name="Cache">Defines whether to allow caching for a read operation's response and
 /// how long that response should be valid in the cache.</param>
-/// <details>
+/// <remarks>
 /// This type is mutable.
-/// </details>
+/// </remarks>
 public class Entity
 {
     public const string PROPERTY_PATH = "path";

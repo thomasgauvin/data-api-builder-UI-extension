@@ -5,9 +5,9 @@ using System.Text.RegularExpressions;
 
 namespace Azure.DataApiBuilder.Config.ObjectModel;
 
-/// <details>
+/// <remarks>
 /// This type is mutable.
-/// </details>
+/// </remarks>
 public class EntityActionPolicy
 {
     public string? Request { get; set; }

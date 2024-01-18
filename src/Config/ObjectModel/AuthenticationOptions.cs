@@ -11,9 +11,9 @@ namespace Azure.DataApiBuilder.Config.ObjectModel;
 /// </param>
 /// <param name="Jwt">Settings enabling validation of the received JWT token.
 /// Required only when Provider is other than EasyAuth.</param>
-/// <details>
+/// <remarks>
 /// This type is mutable.
-/// </details>
+/// </remarks>
 public class AuthenticationOptions
 {
     public string Provider { get; set; }
