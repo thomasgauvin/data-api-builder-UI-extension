@@ -1,22 +1,25 @@
 @page "/configuration"
 @using System.Text.Json
 @using System
+@using System.Text
 @using UI.Shared.SharedClasses
+@using System.IO
+@inject IJSRuntime JS
 
 <FluentLabel Typo=Typography.PageTitle>Configuration</FluentLabel>
 
-@if (mutableRuntimeConfig != null)
+@if (MutableRuntimeConfig != null)
 {
     <div class="config-container">
         <div class="config-item-container">
-            <FluentSelect @bind-Value=mutableRuntimeConfig.MutableDataSource.DatabaseType Items=@databaseTypes
+            <FluentSelect @bind-Value=MutableRuntimeConfig.MutableDataSource.DatabaseType Items=@_databaseTypes
                           OptionValue="@(p => p.Value)"
                           OptionText="@(p => p.Label)"
                       Label="Database type" />
 
         </div>
         <div class="config-item-container">
-            <FluentTextField @bind-Value=mutableRuntimeConfig.MutableDataSource.ConnectionString Label="Connection string" style="width: 100%;"></FluentTextField>
+            <FluentTextField @bind-Value=MutableRuntimeConfig.MutableDataSource.ConnectionString Label="Connection string" style="width: 100%;"></FluentTextField>
         </div>
     </div>
     <FluentDivider />
@@ -26,9 +29,9 @@
         <div class="config-container">
             <FluentLabel Typo=Typography.Subject>REST</FluentLabel>
             <div class="config-item-container flex">
-                <FluentSwitch @bind-Value=mutableRuntimeConfig.MutableRuntimeOptions.Rest.Enabled>Enabled</FluentSwitch>
+                <FluentSwitch @bind-Value=MutableRuntimeConfig.MutableRuntimeOptions.Rest.Enabled>Enabled</FluentSwitch>
                 <div class="ml-4">
-                    <FluentTextField @bind-Value=mutableRuntimeConfig.MutableRuntimeOptions.Rest.Path AriaLabel="Path"></FluentTextField>
+                    <FluentTextField @bind-Value=MutableRuntimeConfig.MutableRuntimeOptions.Rest.Path AriaLabel="Path"></FluentTextField>
                 </div>
             </div>
         </div>
@@ -36,9 +39,9 @@
         <div class="config-container">
             <FluentLabel Typo=Typography.Subject>GraphQL</FluentLabel>
             <div class="config-item-container flex">
-                <FluentSwitch @bind-Value=mutableRuntimeConfig.MutableRuntimeOptions.GraphQL.Enabled>Enabled</FluentSwitch>
+                <FluentSwitch @bind-Value=MutableRuntimeConfig.MutableRuntimeOptions.GraphQL.Enabled>Enabled</FluentSwitch>
                 <div class="ml-4">
-                    <FluentTextField @bind-Value=mutableRuntimeConfig.MutableRuntimeOptions.GraphQL.Path AriaLabel="Path"></FluentTextField>
+                    <FluentTextField @bind-Value=MutableRuntimeConfig.MutableRuntimeOptions.GraphQL.Path AriaLabel="Path"></FluentTextField>
                 </div>
             </div>
         </div>
@@ -47,8 +50,13 @@
     <div class="config-container">
         <FluentLabel Typo=Typography.Subject>CORS</FluentLabel>
         <div class="config-item-container">
-            <FluentTextField @bind-Value=mutableRuntimeConfig!.MutableRuntimeOptions!.Host!.Cors!.Origins Label="CORS origins"></FluentTextField>
+            <FluentTextField @bind-Value=MutableRuntimeConfig!.MutableRuntimeOptions!.Host!.Cors!.Origins Label="CORS origins"></FluentTextField>
         </div>
+    </div>
+
+    <div class ="config-container">
+        <FluentButton @onclick="PublishNewConfig" >Publish</FluentButton>
+        <FluentButton @onclick="SaveNewConfig">Save</FluentButton>
     </div>
 
     <FluentButton OnClick="LogJSON">Log JSON</FluentButton>
@@ -58,27 +66,4 @@
 else
 {
     <p>Loading...</p>
-}
-
-
-@code {
-    [CascadingParameter]
-    protected MutableRuntimeConfig? mutableRuntimeConfig { get; set; }
-
-
-    private List<DatabaseType> databaseTypes = new List<DatabaseType>
-    {
-        new DatabaseType { Label = "Azure SQL", Value = "mssql" },
-        new DatabaseType { Label = "CosmosDB for NoSQL", Value = "cosmosdb_nosql" },
-        new DatabaseType { Label = "PostgreSQL", Value = "postgresql" },
-        new DatabaseType { Label = "MySQL", Value = "mysql" }
-    };
-
-
-    protected void LogJSON()
-    {
-        Console.WriteLine("logging");
-        string value = mutableRuntimeConfig?.ToJson() ?? "";
-        Console.WriteLine(value);
-    }
 }
