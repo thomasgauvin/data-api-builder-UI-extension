@@ -19,36 +19,39 @@ namespace Azure.DataApiBuilder.Config.ObjectModel;
 /// <param name="Mappings">Defines mappings between database fields and GraphQL and REST fields.</param>
 /// <param name="Cache">Defines whether to allow caching for a read operation's response and
 /// how long that response should be valid in the cache.</param>
-public record Entity
+/// <details>
+/// This type is mutable.
+/// </details>
+public class Entity
 {
     public const string PROPERTY_PATH = "path";
     public const string PROPERTY_METHODS = "methods";
 
-    public EntitySource Source { get; init; }
-    public EntityGraphQLOptions GraphQL { get; init; }
-    public EntityRestOptions Rest { get; init; }
-    public EntityPermission[] Permissions { get; init; }
-    public Dictionary<string, string>? Mappings { get; init; }
-    public Dictionary<string, EntityRelationship>? Relationships { get; init; }
-    public EntityCacheOptions? Cache { get; init; }
+    public EntitySource Source { get; set; }
+    public EntityGraphQLOptions GraphQL { get; set; }
+    public EntityRestOptions Rest { get; set; }
+    public EntityPermission[] Permissions { get; set; }
+    public Dictionary<string, string>? Mappings { get; set; }
+    public Dictionary<string, EntityRelationship>? Relationships { get; set; }
+    public EntityCacheOptions? Cache { get; set; }
 
     [JsonConstructor]
     public Entity(
-        EntitySource Source,
-        EntityGraphQLOptions GraphQL,
-        EntityRestOptions Rest,
-        EntityPermission[] Permissions,
-        Dictionary<string, string>? Mappings,
-        Dictionary<string, EntityRelationship>? Relationships,
-        EntityCacheOptions? Cache = null)
+        EntitySource source,
+        EntityGraphQLOptions graphQL,
+        EntityRestOptions rest,
+        EntityPermission[] permissions,
+        Dictionary<string, string>? mappings,
+        Dictionary<string, EntityRelationship>? relationships,
+        EntityCacheOptions? cache)
     {
-        this.Source = Source;
-        this.GraphQL = GraphQL;
-        this.Rest = Rest;
-        this.Permissions = Permissions;
-        this.Mappings = Mappings;
-        this.Relationships = Relationships;
-        this.Cache = Cache;
+        Source = source;
+        GraphQL = graphQL;
+        Rest = rest;
+        Permissions = permissions;
+        Mappings = mappings;
+        Relationships = relationships;
+        Cache = cache;
     }
 
     /// <summary>

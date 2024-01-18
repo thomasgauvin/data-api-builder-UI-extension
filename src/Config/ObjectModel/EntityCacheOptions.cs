@@ -11,7 +11,10 @@ namespace Azure.DataApiBuilder.Config.ObjectModel;
 /// Properties are nullable to support DAB CLI merge config
 /// expected behavior.
 /// </summary>
-public record EntityCacheOptions
+/// <remarks>
+/// This type is mutable.
+/// </remarks>
+public class EntityCacheOptions
 {
     /// <summary>
     /// Default ttl value for an entity.
@@ -22,29 +25,13 @@ public record EntityCacheOptions
     /// Whether the cache should be used for the entity.
     /// </summary>
     [JsonPropertyName("enabled")]
-    public bool? Enabled { get; init; } = false;
+    public bool? Enabled { get; set; }
 
     /// <summary>
     /// The number of seconds a cache entry is valid before eligible for cache eviction.
     /// </summary>
     [JsonPropertyName("ttl-seconds")]
-    public int? TtlSeconds { get; init; } = null;
-
-    [JsonConstructor]
-    public EntityCacheOptions(bool? Enabled = null, int? TtlSeconds = null)
-    {
-        this.Enabled = Enabled;
-
-        if (TtlSeconds is not null)
-        {
-            this.TtlSeconds = TtlSeconds;
-            UserProvidedTtlOptions = true;
-        }
-        else
-        {
-            this.TtlSeconds = DEFAULT_TTL_SECONDS;
-        }
-    }
+    public int? TtlSeconds { get; set; }
 
     /// <summary>
     /// Flag which informs CLI and JSON serializer whether to write ttl-seconds
@@ -58,5 +45,20 @@ public record EntityCacheOptions
     /// </summary>
     [JsonIgnore(Condition = JsonIgnoreCondition.Always)]
     [MemberNotNullWhen(true, nameof(TtlSeconds))]
-    public bool UserProvidedTtlOptions { get; init; } = false;
+    public bool UserProvidedTtlOptions { get; set; }
+
+    [JsonConstructor]
+    public EntityCacheOptions(bool? enabled, int? ttlSeconds)
+    {
+        Enabled = enabled;
+        if (ttlSeconds is not null)
+        {
+            TtlSeconds = ttlSeconds;
+            UserProvidedTtlOptions = true;
+        }
+        else
+        {
+            TtlSeconds = DEFAULT_TTL_SECONDS;
+        }
+    }
 }

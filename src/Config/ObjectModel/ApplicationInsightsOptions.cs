@@ -6,5 +6,17 @@ namespace Azure.DataApiBuilder.Config.ObjectModel;
 /// <summary>
 /// Represents the options for configuring Application Insights.
 /// </summary>
-public record ApplicationInsightsOptions(bool Enabled = false, string? ConnectionString = null)
-{ }
+/// <remarks>
+/// This type is mutable.
+/// </remarks>
+public class ApplicationInsightsOptions
+{
+    public bool Enabled { get; set; }
+    public string? ConnectionString { get; set; }
+
+    public ApplicationInsightsOptions(bool enabled = false, string? connectionString = null)
+    {
+        Enabled = enabled;
+        ConnectionString = connectionString;
+    }
+}

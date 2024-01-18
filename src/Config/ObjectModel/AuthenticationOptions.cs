@@ -11,12 +11,29 @@ namespace Azure.DataApiBuilder.Config.ObjectModel;
 /// </param>
 /// <param name="Jwt">Settings enabling validation of the received JWT token.
 /// Required only when Provider is other than EasyAuth.</param>
-public record AuthenticationOptions(string Provider = nameof(EasyAuthType.StaticWebApps), JwtOptions? Jwt = null)
+/// <details>
+/// This type is mutable.
+/// </details>
+public class AuthenticationOptions
 {
+    public string Provider { get; set; }
+    public JwtOptions Jwt { get; set; }
+
     public const string SIMULATOR_AUTHENTICATION = "Simulator";
     public const string CLIENT_PRINCIPAL_HEADER = "X-MS-CLIENT-PRINCIPAL";
     public const string NAME_CLAIM_TYPE = "name";
     public const string ROLE_CLAIM_TYPE = "roles";
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="AuthenticationOptions"/> class.
+    /// </summary>
+    /// <param name="provider">Identity Provider.</param>
+    /// <param name="jwt">Settings enabling validation of the received JWT token.</param>
+    public AuthenticationOptions(string provider, JwtOptions jwt)
+    {
+        Provider = provider;
+        Jwt = jwt;
+    }
 
     /// <summary>
     /// Returns whether the configured Provider matches an
@@ -36,4 +53,4 @@ public record AuthenticationOptions(string Provider = nameof(EasyAuthType.Static
     /// </summary>
     /// <returns>True if the provider is enabled for JWT, otherwise false.</returns>
     public bool IsJwtConfiguredIdentityProvider() => !IsEasyAuthAuthenticationProvider() && !IsAuthenticationSimulatorEnabled();
-};
+}

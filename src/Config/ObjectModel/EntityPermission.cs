@@ -10,5 +10,16 @@ namespace Azure.DataApiBuilder.Config.ObjectModel;
 /// <param name="Actions">An array of what can be performed against the entity for the actions.
 /// This can be written in JSON using shorthand notation, or as a full object, with a custom <c>JsonConverter</c> to convert that into the .NET type.</param>
 #pragma warning disable CA1711 // Identifiers should not have incorrect suffix
-public record EntityPermission(string Role, EntityAction[] Actions);
+public class EntityPermission
+{
+    public string Role { get; set; }
+
+    public EntityAction[] Actions { get; set; }
+
+    public EntityPermission(string role, EntityAction[] actions)
+    {
+        Role = role;
+        Actions = actions;
+    }
+}
 #pragma warning restore CA1711 // Identifiers should not have incorrect suffix

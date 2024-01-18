@@ -5,8 +5,20 @@ using System.Text.RegularExpressions;
 
 namespace Azure.DataApiBuilder.Config.ObjectModel;
 
-public record EntityActionPolicy(string? Request = null, string? Database = null)
+/// <details>
+/// This type is mutable.
+/// </details>
+public class EntityActionPolicy
 {
+    public string? Request { get; set; }
+    public string? Database { get; set; }
+
+    public EntityActionPolicy(string? request = null, string? database = null)
+    {
+        Request = request;
+        Database = database;
+    }
+
     public string ProcessedDatabaseFields()
     {
         if (Database is null)
