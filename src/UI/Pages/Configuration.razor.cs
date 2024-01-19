@@ -6,21 +6,50 @@ using Microsoft.JSInterop;
 using System.Text.Json;
 using System.Text;
 using UI.Shared.SharedClasses;
+using Azure.DataApiBuilder.Config.ObjectModel;
+using System.Net.Http.Json;
+using DatabaseType = UI.Shared.SharedClasses.DatabaseType;
 
 namespace UI.Pages
 {
     public partial class Configuration : ComponentBase
     {
+        [Parameter]
+        public string SelectedProvider { get; set; } = "";
+
         [CascadingParameter]
         protected MutableRuntimeConfig? MutableRuntimeConfig { get; set; }
 
-        private static void PublishNewConfig()
+        private Type? _selectedType;
+
+        private void OnAuthNProviderChange(ChangeEventArgs e)
+        {
+            _selectedType = e.Value?.ToString()?.Length > 0 ? Type.GetType($"UI.Pages.{e.Value}") : null;
+        }
+
+        private async Task<HttpResponseMessage> PublishNewConfig()
         {
             Console.WriteLine("Publish Button Clicked!");
             // Perform http operation on endpoint.
+
+            string json = JsonSerializer.Serialize(MutableRuntimeConfig);
+            ConfigurationPostParameters configParam =
+                new(Configuration: json,
+                    Schema: null,
+                    ConnectionString: MutableRuntimeConfig!.MutableDataSource.ConnectionString!,
+                    AccessToken: null);
+
+            string configurationEndpoint = "https://localhost:5001/configuration";
+
+            using (HttpClient httpClient = new())
+            {
+                JsonContent jsonContent =
+                    JsonContent.Create(configParam, typeof(ConfigurationPostParameters));
+                return await httpClient.PostAsync(configurationEndpoint, jsonContent);
+            }
         }
 
-        private void SaveNewConfig()
+        private async void SaveNewConfig()
         {
             string json = JsonSerializer.Serialize(MutableRuntimeConfig);
             Byte[] byteArray = Encoding.UTF8.GetBytes(json);
@@ -28,7 +57,7 @@ namespace UI.Pages
             string fileName = "dab-config-ui-modified.json";
             Console.WriteLine(fileName);
             using DotNetStreamReference streamRef = new(stream: fileStream);
-            //GetFileStream();
+            await JS.InvokeVoidAsync("downloadFileFromStream", fileName, streamRef);
         }
 
         private List<DatabaseType> _databaseTypes = new()
