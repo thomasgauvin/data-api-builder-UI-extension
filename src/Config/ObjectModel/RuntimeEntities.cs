@@ -12,6 +12,9 @@ namespace Azure.DataApiBuilder.Config.ObjectModel;
 /// <summary>
 /// Represents the collection of <see cref="Entity"/> available from the RuntimeConfig.
 /// </summary>
+/// <remarks>
+/// This record is mutable.
+/// </remarks>
 [JsonConverter(typeof(RuntimeEntitiesConverter))]
 public record RuntimeEntities : IEnumerable<KeyValuePair<string, Entity>>
 {
@@ -78,7 +81,7 @@ public record RuntimeEntities : IEnumerable<KeyValuePair<string, Entity>>
         {
             nameCorrectedEntity = nameCorrectedEntity
                 with
-            { GraphQL = new(Singular: entityName, Plural: string.Empty) };
+            { GraphQL = new(singular: entityName, plural: string.Empty) };
         }
 
         // If no Singular version of the entity name was provided, use the Entity Name from the config
@@ -129,7 +132,7 @@ public record RuntimeEntities : IEnumerable<KeyValuePair<string, Entity>>
                     nameCorrectedEntity
                         with
                     // Unless explicilty configured through config file, REST endpoints are enabled for entities backed by tables/views.
-                    { Rest = new EntityRestOptions(Enabled: true) };
+                    { Rest = new EntityRestOptions(enabled: true) };
         }
         else if (nameCorrectedEntity.Source.Type is EntitySourceType.StoredProcedure && (nameCorrectedEntity.Rest.Methods is null || nameCorrectedEntity.Rest.Methods.Length == 0))
         {
@@ -138,7 +141,7 @@ public record RuntimeEntities : IEnumerable<KeyValuePair<string, Entity>>
             // enabled by default unless otherwise specified.
             // When the Methods property is configured in the config file, the parser correctly parses and populates the methods configured.
             // However, when absent in the config file, REST methods that are enabled by default needs to be populated.
-            nameCorrectedEntity = nameCorrectedEntity with { Rest = new EntityRestOptions(Methods: EntityRestOptions.DEFAULT_HTTP_VERBS_ENABLED_FOR_SP, Path: nameCorrectedEntity.Rest.Path, Enabled: nameCorrectedEntity.Rest.Enabled) };
+            nameCorrectedEntity = nameCorrectedEntity with { Rest = new EntityRestOptions(methods: EntityRestOptions.DEFAULT_HTTP_VERBS_ENABLED_FOR_SP, path: nameCorrectedEntity.Rest.Path, enabled: nameCorrectedEntity.Rest.Enabled) };
         }
 
         return nameCorrectedEntity;
