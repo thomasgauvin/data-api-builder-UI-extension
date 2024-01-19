@@ -349,8 +349,8 @@ namespace Azure.DataApiBuilder.Service
             app.UseAuthorization();
 
             //add endpoints to get and set the runtime config when in development
-            //if (env.IsDevelopment())
-            //{
+            if (IsUIEnabled(runtimeConfig, env))
+            {
                 app.UseEndpoints(endpoints =>
                 {
                     endpoints.MapGet("/dab-config", async context =>
@@ -364,7 +364,7 @@ namespace Azure.DataApiBuilder.Service
                         pattern: "/dab-config"
                     );
                 });
-            //}
+            }
 
             // Authorization Engine middleware enforces that all requests (including introspection)
             // include proper auth headers.
