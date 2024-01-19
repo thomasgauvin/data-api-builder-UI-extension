@@ -54,14 +54,39 @@
         </div>
     </div>
 
+    <div class="config-container">
+        <FluentLabel Typo=Typography.Subject>Authentication</FluentLabel>
+        <div class="config-item-container">
+            <FluentTextField Label="AuthN"> </FluentTextField>
+            @if (MutableRuntimeConfig.MutableRuntimeOptions?.Host?.Authentication is not null)
+            {
+                <FluentTextField @bind-Value=MutableRuntimeConfig.MutableRuntimeOptions.Host.Authentication.Provider Label="Provider"></FluentTextField>
+            }
+        </div>
+        <label>
+            @if (MutableRuntimeConfig.MutableRuntimeOptions?.Host?.Authentication is not null)
+            {
+                <select @onchange="OnAuthNProviderChange">
+                    <option value="">Select a value</option>
+                    <option value="SWA">StaticWebApps</option>
+                    <option value="JwtAuthenticationComponent">OpenID Connect Provider</option>
+                </select>
+            }
+        </label>
+    </div>
+    @if (_selectedType is not null)
+    {
+        <div class="config-container">
+            <DynamicComponent Type="@_selectedType" />
+        </div>
+    }
+
     <div class ="config-container">
-        <FluentButton @onclick="PublishNewConfig" >Publish</FluentButton>
+        <FluentButton @onclick="PublishNewConfig">Publish</FluentButton>
         <FluentButton @onclick="SaveNewConfig">Save</FluentButton>
     </div>
 
     <FluentButton OnClick="LogJSON">Log JSON</FluentButton>
-
-
 }
 else
 {

@@ -14,8 +14,18 @@ namespace UI.Pages
 {
     public partial class Configuration : ComponentBase
     {
+        [Parameter]
+        public string SelectedProvider { get; set; } = "";
+
         [CascadingParameter]
         protected MutableRuntimeConfig? MutableRuntimeConfig { get; set; }
+
+        private Type? _selectedType;
+
+        private void OnAuthNProviderChange(ChangeEventArgs e)
+        {
+            _selectedType = e.Value?.ToString()?.Length > 0 ? Type.GetType($"UI.Pages.{e.Value}") : null;
+        }
 
         private async Task<HttpResponseMessage> PublishNewConfig()
         {
@@ -39,7 +49,7 @@ namespace UI.Pages
             }
         }
 
-        private void SaveNewConfig()
+        private async void SaveNewConfig()
         {
             string json = JsonSerializer.Serialize(MutableRuntimeConfig);
             Byte[] byteArray = Encoding.UTF8.GetBytes(json);
@@ -47,7 +57,7 @@ namespace UI.Pages
             string fileName = "dab-config-ui-modified.json";
             Console.WriteLine(fileName);
             using DotNetStreamReference streamRef = new(stream: fileStream);
-            //GetFileStream();
+            await JS.InvokeVoidAsync("downloadFileFromStream", fileName, streamRef);
         }
 
         private List<DatabaseType> _databaseTypes = new()
