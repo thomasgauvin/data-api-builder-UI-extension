@@ -286,7 +286,7 @@ namespace Azure.DataApiBuilder.Service
             app.UsePathRewriteMiddleware();
 
             //Adding custom Database Connections Studio UI
-            if (IsUIEnabled(runtimeConfig, env))
+            if (IsUIEnabled(runtimeConfig))
             {
                 app.UseStaticFiles(); //serving the built html from wwwroot
             }
@@ -294,7 +294,7 @@ namespace Azure.DataApiBuilder.Service
             // SwaggerUI visualization of the OpenAPI description document is only available
             // in developer mode in alignment with the restriction placed on ChilliCream's BananaCakePop IDE.
             // Consequently, SwaggerUI is not presented in a StaticWebApps (late-bound config) environment.
-            if (IsUIEnabled(runtimeConfig, env))
+            if (IsUIEnabled(runtimeConfig))
             {
                 app.UseSwaggerUI(c =>
                 {
@@ -319,20 +319,19 @@ namespace Azure.DataApiBuilder.Service
                 bool isHealthCheckRequest = context.Request.Path == "/" && context.Request.Method == HttpMethod.Get.Method;
                 bool isSettingConfig = context.Request.Path.StartsWithSegments("/configuration")
                     && context.Request.Method == HttpMethod.Post.Method;
+
+                // Move to the next middleware if runtime is ready
+                // The configuration controller further decides to serve the GET request
+                // only if UI is enabled.
+                // 
                 if (isRuntimeReady || isHealthCheckRequest)
                 {
                     await next.Invoke();
                 }
+                // If runtime is not ready, and UI is disabled, only allow modifying configuration via a POST.
                 else if (isSettingConfig)
                 {
-                    if (isRuntimeReady)
-                    {
-                        context.Response.StatusCode = StatusCodes.Status409Conflict;
-                    }
-                    else
-                    {
-                        await next.Invoke();
-                    }
+                    await next.Invoke();
                 }
                 else
                 {
@@ -347,24 +346,6 @@ namespace Azure.DataApiBuilder.Service
             app.UseClientRoleHeaderAuthenticationMiddleware();
 
             app.UseAuthorization();
-
-            //add endpoints to get and set the runtime config when in development
-            if (IsUIEnabled(runtimeConfig, env))
-            {
-                app.UseEndpoints(endpoints =>
-                {
-                    endpoints.MapGet("/dab-config", async context =>
-                    {
-                        context.Response.ContentType = "application/json";
-                        await context.Response.WriteAsync(runtimeConfig!.ToJson());
-                    });
-
-                    endpoints.MapControllerRoute(
-                        name: "dab-config",
-                        pattern: "/dab-config"
-                    );
-                });
-            }
 
             // Authorization Engine middleware enforces that all requests (including introspection)
             // include proper auth headers.
@@ -383,7 +364,7 @@ namespace Azure.DataApiBuilder.Service
                     Tool = {
                         // Determines if accessing the endpoint from a browser
                         // will load the GraphQL Banana Cake Pop IDE.
-                        Enable = IsUIEnabled(runtimeConfig, env)
+                        Enable = IsUIEnabled(runtimeConfig)
                     }
                 });
 
@@ -690,9 +671,9 @@ namespace Azure.DataApiBuilder.Service
         /// <summary>
         /// Indicates whether to provide UI visualization of REST(via Swagger) or GraphQL (via Banana CakePop).
         /// </summary>
-        private static bool IsUIEnabled(RuntimeConfig? runtimeConfig, IWebHostEnvironment env)
+        public static bool IsUIEnabled(RuntimeConfig? runtimeConfig)
         {
-            return (runtimeConfig is not null && runtimeConfig.IsDevelopmentMode()) || env.IsDevelopment();
+            return (runtimeConfig is not null && runtimeConfig.IsDevelopmentMode());
         }
     }
 }

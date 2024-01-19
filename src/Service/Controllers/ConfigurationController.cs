@@ -3,7 +3,6 @@
 
 using System;
 using System.Net.Mime;
-using System.Text.Json;
 using System.Threading.Tasks;
 using Azure.DataApiBuilder.Config;
 using Azure.DataApiBuilder.Config.ObjectModel;
@@ -31,14 +30,16 @@ namespace Azure.DataApiBuilder.Service.Controllers
         [Produces("application/json")]
         public ContentResult Index()
         {
-            if (_configurationProvider.TryGetConfig(out RuntimeConfig? runtimeConfig))
+            if (_configurationProvider.TryGetConfig(out RuntimeConfig? runtimeConfig)
+                && Startup.IsUIEnabled(runtimeConfig))
             {
-                string serializedRuntimeConfig = JsonSerializer.Serialize(runtimeConfig);
-                return Content(serializedRuntimeConfig, MediaTypeNames.Application.Json);
+                RuntimeConfig configToBeReturned =
+                    runtimeConfig with { DataSource = runtimeConfig.DataSource with { ConnectionString = string.Empty } };
+                return Content(configToBeReturned.ToJson(), MediaTypeNames.Application.Json);
             }
             else
             {
-                return Content("No config found.", MediaTypeNames.Application.Json);
+                return Content("No configuration found.", MediaTypeNames.Application.Rtf);
             }
         }
 
@@ -52,7 +53,7 @@ namespace Azure.DataApiBuilder.Service.Controllers
         [HttpPost("v2")]
         public async Task<ActionResult> Index([FromBody] ConfigurationPostParametersV2 configuration)
         {
-            if (_configurationProvider.TryGetConfig(out _))
+            if (_configurationProvider.TryGetConfig(out RuntimeConfig? config) && !Startup.IsUIEnabled(config))
             {
                 return new ConflictResult();
             }
@@ -97,7 +98,7 @@ namespace Azure.DataApiBuilder.Service.Controllers
         /// or Conflict if the runtime is already configured </returns>
         public async Task<ActionResult> Index([FromBody] ConfigurationPostParameters configuration)
         {
-            if (_configurationProvider.TryGetConfig(out _))
+            if (_configurationProvider.TryGetConfig(out RuntimeConfig ? config) && !Startup.IsUIEnabled(config))
             {
                 return new ConflictResult();
             }
