@@ -21,15 +21,6 @@ public record ApplicationInsightsOptions
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="ApplicationInsightsOptions"/> class.
-    /// </summary>
-    public ApplicationInsightsOptions()
-    {
-        Enabled = default!;
-        ConnectionString = default!;
-    }
-
-    /// <summary>
     /// Gets or sets a value indicating whether Application Insights is enabled.
     /// </summary>
     public bool Enabled { get; set; }
