@@ -6,6 +6,9 @@ using Microsoft.JSInterop;
 using System.Text.Json;
 using System.Text;
 using UI.Shared.SharedClasses;
+using Azure.DataApiBuilder.Config.ObjectModel;
+using System.Net.Http.Json;
+using DatabaseType = UI.Shared.SharedClasses.DatabaseType;
 
 namespace UI.Pages
 {
@@ -14,10 +17,26 @@ namespace UI.Pages
         [CascadingParameter]
         protected MutableRuntimeConfig? MutableRuntimeConfig { get; set; }
 
-        private static void PublishNewConfig()
+        private async Task<HttpResponseMessage> PublishNewConfig()
         {
             Console.WriteLine("Publish Button Clicked!");
             // Perform http operation on endpoint.
+
+            string json = JsonSerializer.Serialize(MutableRuntimeConfig);
+            ConfigurationPostParameters configParam =
+                new(Configuration: json,
+                    Schema: null,
+                    ConnectionString: MutableRuntimeConfig!.MutableDataSource.ConnectionString!,
+                    AccessToken: null);
+
+            string configurationEndpoint = "https://localhost:5001/configuration";
+
+            using (HttpClient httpClient = new())
+            {
+                JsonContent jsonContent =
+                    JsonContent.Create(configParam, typeof(ConfigurationPostParameters));
+                return await httpClient.PostAsync(configurationEndpoint, jsonContent);
+            }
         }
 
         private void SaveNewConfig()
