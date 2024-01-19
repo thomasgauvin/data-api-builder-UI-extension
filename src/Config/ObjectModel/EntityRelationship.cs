@@ -5,9 +5,9 @@ using System.Text.Json.Serialization;
 
 namespace Azure.DataApiBuilder.Config.ObjectModel;
 
-/// <summary>
-/// This class is mutable.
-/// </summary>
+/// <remarks>
+/// This type is mutable.
+/// </remarks>
 public class EntityRelationship
 {
     [JsonPropertyName("cardinality")]

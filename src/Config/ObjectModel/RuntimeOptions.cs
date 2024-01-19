@@ -6,14 +6,29 @@ using System.Text.Json.Serialization;
 
 namespace Azure.DataApiBuilder.Config.ObjectModel;
 
-public record RuntimeOptions
+/// <summary>
+/// This class is mutable.
+/// </summary>
+public class RuntimeOptions
 {
-    public RestRuntimeOptions? Rest { get; init; }
-    public GraphQLRuntimeOptions? GraphQL { get; init; }
-    public HostOptions? Host { get; init; }
-    public string? BaseRoute { get; init; }
-    public TelemetryOptions? Telemetry { get; init; }
-    public EntityCacheOptions? Cache { get; init; }
+    public RestRuntimeOptions? Rest { get; set; }
+    public GraphQLRuntimeOptions? GraphQL { get; set; }
+    public HostOptions? Host { get; set; }
+    public string? BaseRoute { get; set; }
+    public TelemetryOptions? Telemetry { get; set; }
+    public EntityCacheOptions? Cache { get; set; }
+
+    /// <summary>
+    /// Resolves the value of the cache property if present, default is false.
+    /// Caching is enabled only when explicitly set to true.
+    /// </summary>
+    /// <returns>Whether caching is enabled globally.</returns>
+    [JsonIgnore]
+    [MemberNotNullWhen(true, nameof(Cache))]
+    public bool IsCachingEnabled =>
+            Cache is not null &&
+            Cache.Enabled is not null &&
+            Cache.Enabled is true;
 
     [JsonConstructor]
     public RuntimeOptions(
@@ -31,16 +46,4 @@ public record RuntimeOptions
         this.Telemetry = Telemetry;
         this.Cache = Cache;
     }
-
-    /// <summary>
-    /// Resolves the value of the cache property if present, default is false.
-    /// Caching is enabled only when explicitly set to true.
-    /// </summary>
-    /// <returns>Whether caching is enabled globally.</returns>
-    [JsonIgnore]
-    [MemberNotNullWhen(true, nameof(Cache))]
-    public bool IsCachingEnabled =>
-            Cache is not null &&
-            Cache.Enabled is not null &&
-            Cache.Enabled is true;
 }

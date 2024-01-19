@@ -12,8 +12,9 @@ namespace Azure.DataApiBuilder.Config.ObjectModel;
 /// <summary>
 /// Represents the collection of <see cref="Entity"/> available from the RuntimeConfig.
 /// </summary>
+/// <remarks>This class is mutable.</remarks>
 [JsonConverter(typeof(RuntimeEntitiesConverter))]
-public record RuntimeEntities : IEnumerable<KeyValuePair<string, Entity>>
+public class RuntimeEntities : IEnumerable<KeyValuePair<string, Entity>>
 {
     /// <summary>
     /// The collection of <see cref="Entity"/> available from the RuntimeConfig.
