@@ -18,7 +18,7 @@ public record RuntimeEntities : IEnumerable<KeyValuePair<string, Entity>>
     /// <summary>
     /// The collection of <see cref="Entity"/> available from the RuntimeConfig.
     /// </summary>
-    public IReadOnlyDictionary<string, Entity> Entities { get; init; }
+    public IReadOnlyDictionary<string, Entity> Entities { get; set; }
 
     /// <summary>
     /// Creates a new instance of the <see cref="RuntimeEntities"/> class using a collection of entities.
@@ -121,15 +121,21 @@ public record RuntimeEntities : IEnumerable<KeyValuePair<string, Entity>>
         // If no Rest node was provided in the config, set it with the default state of enabled for all verbs
         if (nameCorrectedEntity.Rest is null)
         {
-            nameCorrectedEntity = (nameCorrectedEntity.Source.Type is EntitySourceType.StoredProcedure) ?
-                                    nameCorrectedEntity
-                        with
-                                    { Rest = new EntityRestOptions(EntityRestOptions.DEFAULT_HTTP_VERBS_ENABLED_FOR_SP) }
-                    :
-                    nameCorrectedEntity
-                        with
-                    // Unless explicilty configured through config file, REST endpoints are enabled for entities backed by tables/views.
-                    { Rest = new EntityRestOptions(Enabled: true) };
+            if (nameCorrectedEntity.Source.Type is EntitySourceType.StoredProcedure)
+            {
+                nameCorrectedEntity = (nameCorrectedEntity with
+                {
+                    Rest = new EntityRestOptions(EntityRestOptions.DEFAULT_HTTP_VERBS_ENABLED_FOR_SP)
+                });
+            }
+            else
+            {
+                // Unless explicilty configured through config file, REST endpoints are enabled for entities backed by tables/views.
+                nameCorrectedEntity = (nameCorrectedEntity with
+                {
+                    Rest = new EntityRestOptions(enabled: true)
+                });
+            }
         }
         else if (nameCorrectedEntity.Source.Type is EntitySourceType.StoredProcedure && (nameCorrectedEntity.Rest.Methods is null || nameCorrectedEntity.Rest.Methods.Length == 0))
         {
@@ -138,7 +144,10 @@ public record RuntimeEntities : IEnumerable<KeyValuePair<string, Entity>>
             // enabled by default unless otherwise specified.
             // When the Methods property is configured in the config file, the parser correctly parses and populates the methods configured.
             // However, when absent in the config file, REST methods that are enabled by default needs to be populated.
-            nameCorrectedEntity = nameCorrectedEntity with { Rest = new EntityRestOptions(Methods: EntityRestOptions.DEFAULT_HTTP_VERBS_ENABLED_FOR_SP, Path: nameCorrectedEntity.Rest.Path, Enabled: nameCorrectedEntity.Rest.Enabled) };
+            nameCorrectedEntity = nameCorrectedEntity with
+            {
+                Rest = new EntityRestOptions(methods: EntityRestOptions.DEFAULT_HTTP_VERBS_ENABLED_FOR_SP, path: nameCorrectedEntity.Rest.Path, enabled: nameCorrectedEntity.Rest.Enabled)
+            };
         }
 
         return nameCorrectedEntity;

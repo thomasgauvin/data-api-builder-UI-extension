@@ -5,8 +5,50 @@ using System.Text.RegularExpressions;
 
 namespace Azure.DataApiBuilder.Config.ObjectModel;
 
-public record EntityActionPolicy(string? Request = null, string? Database = null)
+/// <summary>
+/// This record is mutable.
+/// </summary>
+public record EntityActionPolicy
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="EntityActionPolicy"/> class.
+    /// </summary>
+    /// <param name="request">The request.</param>
+    /// <param name="database">The database.</param>
+    public EntityActionPolicy(string? request = null, string? database = null)
+    {
+        Request = request;
+        Database = database;
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="EntityActionPolicy"/> class.
+    /// </summary>
+    /// <remarks>
+    /// This record is mutable.
+    /// </remarks>
+    public EntityActionPolicy()
+    {
+        Request = default!;
+        Database = default!;
+    }
+
+    /// <summary>
+    /// Gets or sets the request.
+    /// </summary>
+    /// <value>
+    /// The request.
+    /// </value>
+    public string? Request { get; set; }
+
+    /// <summary>
+    /// Gets or sets the database.
+    /// </summary>
+    /// <value>
+    /// The database.
+    /// </value>
+    public string? Database { get; set; }
+
     public string ProcessedDatabaseFields()
     {
         if (Database is null)

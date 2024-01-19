@@ -3,6 +3,7 @@
 
 using System.Text.Json;
 using System.Text.Json.Serialization;
+
 using Azure.DataApiBuilder.Config.NamingPolicies;
 
 namespace Azure.DataApiBuilder.Config.ObjectModel;
@@ -10,11 +11,47 @@ namespace Azure.DataApiBuilder.Config.ObjectModel;
 /// <summary>
 /// Contains the information needed to connect to the backend database.
 /// </summary>
-/// <param name="DatabaseType">Type of database to use.</param>
-/// <param name="ConnectionString">Connection string to access the database.</param>
-/// <param name="Options">Custom options for the specific database. If there are no options, this could be null.</param>
-public record DataSource(DatabaseType DatabaseType, string ConnectionString, Dictionary<string, JsonElement>? Options)
+/// <remarks>This record is mutable.</remarks>
+public record DataSource
 {
+    /// <summary>
+    /// Type of database to use.
+    /// </summary>
+    public DatabaseType DatabaseType { get; set; }
+
+    /// <summary>
+    /// Connection string to access the database.
+    /// </summary>
+    public string ConnectionString { get; set; }
+
+    /// <summary>
+    /// Custom options for the specific database. If there are no options, this could be null.
+    /// </summary>
+    public Dictionary<string, JsonElement>? Options { get; set; }
+
+    /// <summary>
+    /// Empty constructor for DataSource.
+    /// </summary>
+    public DataSource()
+    {
+        DatabaseType = default!;
+        ConnectionString = default!;
+        Options = null;
+    }
+
+    /// <summary>
+    /// Constructor for DataSource.
+    /// </summary>
+    /// <param name="databaseType">Type of database to use.</param>
+    /// <param name="connectionString">Connection string to access the database.</param>
+    /// <param name="options">Custom options for the specific database. If there are no options, this could be null.</param>
+    public DataSource(DatabaseType databaseType, string connectionString, Dictionary<string, JsonElement>? options)
+    {
+        DatabaseType = databaseType;
+        ConnectionString = connectionString;
+        Options = options;
+    }
+
     /// <summary>
     /// Converts the <c>Options</c> dictionary into a typed options object.
     /// May return null if the dictionary is null.

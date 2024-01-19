@@ -12,17 +12,17 @@ namespace Azure.DataApiBuilder.Config.ObjectModel;
 public record RuntimeConfig
 {
     [JsonPropertyName("$schema")]
-    public string Schema { get; init; }
+    public string Schema { get; set; }
 
     public const string DEFAULT_CONFIG_SCHEMA_LINK = "https://github.com/Azure/data-api-builder/releases/download/vmajor.minor.patch/dab.draft.schema.json";
 
-    public DataSource DataSource { get; init; }
+    public DataSource DataSource { get; set; }
 
-    public RuntimeOptions? Runtime { get; init; }
+    public RuntimeOptions? Runtime { get; set; }
 
-    public RuntimeEntities Entities { get; init; }
+    public RuntimeEntities Entities { get; set; }
 
-    public DataSourceFiles? DataSourceFiles { get; init; }
+    public DataSourceFiles? DataSourceFiles { get; set; }
 
     [JsonIgnore(Condition = JsonIgnoreCondition.Always)]
     public bool CosmosDataSourceUsed { get; private set; }
