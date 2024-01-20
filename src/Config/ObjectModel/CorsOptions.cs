@@ -6,7 +6,36 @@ namespace Azure.DataApiBuilder.Config.ObjectModel;
 /// <summary>
 /// Configuration related to Cross Origin Resource Sharing (CORS).
 /// </summary>
-/// <param name="Origins">List of allowed origins.</param>
-/// <param name="AllowCredentials">
-/// Whether to set Access-Control-Allow-Credentials CORS header.</param>
-public record CorsOptions(string[] Origins, bool AllowCredentials = false);
+/// <remarks>This record is mutable.</remarks>
+public record CorsOptions
+{
+    /// <summary>
+    /// List of allowed origins.
+    /// </summary>
+    public string[] Origins { get; set; }
+
+    /// <summary>
+    /// Whether to set Access-Control-Allow-Credentials CORS header.
+    /// </summary>
+    public bool AllowCredentials { get; set; }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="CorsOptions"/> class.
+    /// </summary>
+    /// <param name="origins">List of allowed origins.</param>
+    /// <param name="allowCredentials">Whether to set Access-Control-Allow-Credentials CORS header.</param>
+    public CorsOptions(string[] origins, bool allowCredentials = false)
+    {
+        Origins = origins;
+        AllowCredentials = allowCredentials;
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="CorsOptions"/> class.
+    /// </summary>
+    public CorsOptions()
+    {
+        Origins = Array.Empty<string>();
+        AllowCredentials = default!;
+    }
+}
