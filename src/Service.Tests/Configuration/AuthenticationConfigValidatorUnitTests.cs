@@ -66,8 +66,8 @@ namespace Azure.DataApiBuilder.Service.Tests.Configuration
                 Audience: "12345",
                 Issuer: "https://login.microsoftonline.com/common");
             AuthenticationOptions authNConfig = new(
-                Provider: "AzureAD",
-                Jwt: jwt);
+                provider: "AzureAD",
+                jwt: jwt);
             RuntimeConfig config = CreateRuntimeConfigWithOptionalAuthN(authNConfig);
 
             _mockFileSystem.AddFile(
@@ -115,8 +115,8 @@ namespace Azure.DataApiBuilder.Service.Tests.Configuration
                 Audience: "12345",
                 Issuer: string.Empty);
             AuthenticationOptions authNConfig = new(
-                Provider: "AzureAD",
-                Jwt: jwt);
+                provider: "AzureAD",
+                jwt: jwt);
 
             RuntimeConfig config = CreateRuntimeConfigWithOptionalAuthN(authNConfig);
 
@@ -136,8 +136,8 @@ namespace Azure.DataApiBuilder.Service.Tests.Configuration
                 Audience: string.Empty,
                 Issuer: DEFAULT_ISSUER);
             authNConfig = new(
-                Provider: "AzureAD",
-                Jwt: jwt);
+                provider: "AzureAD",
+                jwt: jwt);
             config = CreateRuntimeConfigWithOptionalAuthN(authNConfig);
 
             Assert.ThrowsException<NotSupportedException>(() =>
@@ -152,7 +152,7 @@ namespace Azure.DataApiBuilder.Service.Tests.Configuration
             JwtOptions jwt = new(
                 Audience: "12345",
                 Issuer: string.Empty);
-            AuthenticationOptions authNConfig = new(Provider: "EasyAuth", Jwt: jwt);
+            AuthenticationOptions authNConfig = new(provider: "EasyAuth", jwt: jwt);
             RuntimeConfig config = CreateRuntimeConfigWithOptionalAuthN(authNConfig);
 
             _mockFileSystem.AddFile(
@@ -170,7 +170,7 @@ namespace Azure.DataApiBuilder.Service.Tests.Configuration
             jwt = new(
                 Audience: string.Empty,
                 Issuer: DEFAULT_ISSUER);
-            authNConfig = new(Provider: "EasyAuth", Jwt: jwt);
+            authNConfig = new(provider: "EasyAuth", jwt: jwt);
             config = CreateRuntimeConfigWithOptionalAuthN(authNConfig);
 
             Assert.ThrowsException<NotSupportedException>(() =>

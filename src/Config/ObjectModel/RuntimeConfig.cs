@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System.Diagnostics.CodeAnalysis;
 using System.IO.Abstractions;
 using System.Net;
 using System.Text.Json;
@@ -321,6 +322,45 @@ public record RuntimeConfig
     public bool IsDevelopmentMode() =>
         Runtime is not null && Runtime.Host is not null
         && Runtime.Host.Mode is HostMode.Development;
+
+    public static RuntimeConfig? _defaultRuntimeConfig;
+
+    public static RuntimeConfig DefaultRuntimeConfig
+    {
+        get
+        {
+            if (_defaultRuntimeConfig == null && TryPopulateConfigWithDefaults(out _defaultRuntimeConfig))
+            {
+                return _defaultRuntimeConfig;
+            }
+
+            return _defaultRuntimeConfig!;
+        }
+
+        set
+        {
+            TryPopulateConfigWithDefaults(out _defaultRuntimeConfig);
+        }
+    }
+
+    private static bool TryPopulateConfigWithDefaults([NotNullWhen(true)] out RuntimeConfig? config)
+    {
+        DataSource dataSource = new (DatabaseType.MSSQL, ConnectionString: string.Empty, Options: null);
+        config = new(
+            Schema: DEFAULT_CONFIG_SCHEMA_LINK,
+            DataSource: dataSource,
+            Runtime: new(
+                Rest: new(),
+                GraphQL: new(),
+                Host: HostOptions.GetHostOptions(hostMode: HostMode.Development,
+                    corsOrigin: null,
+                    authenticationProvider: "StaticWebApps",
+                    audience: null, issuer: null)
+            ),
+            Entities: new RuntimeEntities(new Dictionary<string, Entity>()));
+
+        return true;
+    }
 
     private void CheckDataSourceNamePresent(string dataSourceName)
     {

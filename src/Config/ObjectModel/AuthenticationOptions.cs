@@ -15,6 +15,12 @@ public record AuthenticationOptions
     /// </summary>
     public string Provider { get; set; } = nameof(EasyAuthType.StaticWebApps);
 
+    public AuthenticationOptions(string provider, JwtOptions? jwt)
+    {
+        Provider = provider;
+        Jwt = jwt;
+    }
+
     /// <summary>
     /// Settings enabling validation of the received JWT token.
     /// Required only when Provider is other than EasyAuth.
