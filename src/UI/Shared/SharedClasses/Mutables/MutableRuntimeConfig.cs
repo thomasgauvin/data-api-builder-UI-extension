@@ -31,7 +31,7 @@ namespace UI.Shared.SharedClasses
                     Authentication = runtimeConfig.Runtime!.Host!.Authentication,
                     Cors = new MutableCorsOptions
                     {
-                        Origins = $"[{string.Join(", ", runtimeConfig.Runtime!.Host!.Cors!.Origins)}]"
+                        Origins = $"[{string.Join(", ", runtimeConfig.Runtime!.Host!.Cors?.Origins ?? new string[0])}]"
                     }
                 }
             };

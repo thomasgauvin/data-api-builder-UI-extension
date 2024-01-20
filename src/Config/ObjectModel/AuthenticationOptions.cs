@@ -21,6 +21,7 @@ public class AuthenticationOptions
         Provider = provider;
         Jwt = jwt;
     }
+
     public const string SIMULATOR_AUTHENTICATION = "Simulator";
     public const string CLIENT_PRINCIPAL_HEADER = "X-MS-CLIENT-PRINCIPAL";
     public const string NAME_CLAIM_TYPE = "name";

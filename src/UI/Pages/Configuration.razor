@@ -13,13 +13,12 @@
     <div class="config-container">
         <div class="config-item-container">
             <FluentSelect @bind-Value=MutableRuntimeConfig.MutableDataSource.DatabaseType Items=@_databaseTypes
-                          OptionValue="@(p => p.Value)"
-                          OptionText="@(p => p.Label)"
-                      Label="Database type" />
-
+                OptionValue="@(p => p.Value)"
+                OptionText="@(p => p.Label)"
+                Label="Database type" />
         </div>
         <div class="config-item-container">
-            <FluentTextField @bind-Value=MutableRuntimeConfig.MutableDataSource.ConnectionString Label="Connection string" style="width: 100%;"></FluentTextField>
+            <FluentTextField TextFieldType="TextFieldType.Password" @bind-Value=MutableRuntimeConfig.MutableDataSource.ConnectionString Label="Connection string" style="width: 100%;"></FluentTextField>
         </div>
     </div>
     <FluentDivider />
@@ -49,16 +48,15 @@
 
     <div class="config-container">
         <FluentLabel Typo=Typography.Subject>CORS</FluentLabel>
-        <div class="config-item-container">
-            <FluentTextField @bind-Value=MutableRuntimeConfig!.MutableRuntimeOptions!.Host!.Cors!.Origins Label="CORS origins"></FluentTextField>
+        <div class="config-item-container flex">
+            <FluentTextField @bind-Value=MutableRuntimeConfig.MutableRuntimeOptions!.Host!.Cors!.Origins Label="CORS origins"></FluentTextField>
         </div>
     </div>
 
     <div class="config-container">
         <FluentLabel Typo=Typography.Subject>Authentication</FluentLabel>
-        <div class="config-item-container">
-            <FluentTextField Label="AuthN"> </FluentTextField>
-            @if (MutableRuntimeConfig.MutableRuntimeOptions?.Host?.Authentication is not null)
+        <div class="config-item-container flex">
+            @if (MutableRuntimeConfig.MutableRuntimeOptions.Host.Authentication is not null)
             {
                 <FluentTextField @bind-Value=MutableRuntimeConfig.MutableRuntimeOptions.Host.Authentication.Provider Label="Provider"></FluentTextField>
             }

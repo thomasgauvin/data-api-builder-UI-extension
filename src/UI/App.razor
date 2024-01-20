@@ -3,11 +3,12 @@
 @using Azure.DataApiBuilder.Config
 @using Azure.DataApiBuilder.Config.ObjectModel
 @using UI.Shared.SharedClasses
+@inject ILogger<App> Logger
 @inject HttpClient Http
 
 <Router AppAssembly="@typeof(App).Assembly">
     <Found Context="routeData">
-        <CascadingValue Value="mutableRuntimeConfig">
+        <CascadingValue Value=MutableRuntimeConfig>
             <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
         </CascadingValue>
     </Found>
@@ -20,29 +21,54 @@
 </Router>
 
 @code {
-    private MutableRuntimeConfig? mutableRuntimeConfig { get; set; }
+    private MutableRuntimeConfig? MutableRuntimeConfig { get; set; }
 
 
     protected override async Task OnInitializedAsync()
     {
-        Console.WriteLine("OnInitializedAsync in App.razor");
+        Logger.LogInformation("OnInitializedAsync in App.razor");
 
         await GetParsedJson();
     }
 
     protected async Task GetParsedJson()
     {
-        Console.WriteLine("Making request to get JSON");
-        // For now, fetch local file to cut DAB engine dependency.
-        string response = await Http.GetStringAsync("/dab-config.json");
-        Console.WriteLine(response);
+        Logger.LogInformation("Making request to get JSON");
+        string response = string.Empty;
 
-        RuntimeConfig? runtimeConfig;
-        RuntimeConfigLoader.TryParseConfig(response, out runtimeConfig);
+        try
+        {
+            // First try to fetch local file.
+            response = await Http.GetStringAsync("/dab-config.json");
+        }
+        catch (HttpRequestException ex)
+        {
+            Logger.LogError($"Could not load configuration from file: {ex}");
 
-        if (runtimeConfig == null) return;
+            try
+            {
+                response = await Http.GetStringAsync("https://localhost:5001/configuration");
+            }
+            catch (Exception engineException)
+            {
+                Logger.LogError($"Exception retreiving configuration from Data API builder : {engineException}");
+            }
+        }
 
-        //copy runtimeConfig into mutable config
-        mutableRuntimeConfig = new MutableRuntimeConfig(runtimeConfig);
+        if (!string.IsNullOrEmpty(response))
+        {
+            Logger.LogInformation(response);
+            RuntimeConfig? runtimeConfig;
+
+            if (RuntimeConfigLoader.TryParseConfig(response, out runtimeConfig))
+            {
+                //copy runtimeConfig into mutable config
+                MutableRuntimeConfig = new MutableRuntimeConfig(runtimeConfig);
+            }
+        }
+        else
+        {
+            MutableRuntimeConfig = new(RuntimeConfig.DefaultRuntimeConfig);
+        }
     }
 }
